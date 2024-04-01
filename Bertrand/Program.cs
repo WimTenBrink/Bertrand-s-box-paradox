@@ -1,5 +1,6 @@
 ﻿const long start = 0;
-const long maxCount = 100000;
+const long maxCount = 1000000;
+Random rnd = new Random();
 
 int silverFirst = 0;
 int twoGold = 0;
@@ -8,11 +9,15 @@ int goldSilver = 0;
 Parallel.For(start, maxCount, i =>
 {
     Console.WriteLine($"Draw {i}: SF = {silverFirst}, GG={twoGold}, GS={goldSilver}.");
-    // We fill the box with either two gold or one gold and one silver.
-    List<Coin> box = Helper.Choose();
+    // We create two boxes, one with two gold coins and the other with one gold and one silver coin.
+    List<List<Coin>> boxes = [[Coin.Gold, Coin.Gold], [Coin.Gold, Coin.Silver]];
+    // We now pick a box.
+    var pickBox = rnd.Next(0, boxes.Count);
+    List<Coin> box = boxes[pickBox];
+    // Show the box.
     Console.WriteLine($"Box {i}: {box[0]} and {box[1]}.");
     // We now pick one of the coins and remove it.
-    var pick = Helper.Rnd.Next(0, box.Count);
+    var pick = rnd.Next(0, box.Count);
     var coin1 = box[pick];
     box.RemoveAt(pick);
     // We now pick the other coin.
@@ -39,18 +44,3 @@ Console.WriteLine($"We have drawn two gold {twoGold} times.");
 Console.WriteLine($"We have drawn one gold and one silver {goldSilver} times.");
 
 public enum Coin { Gold = 1, Silver = 2 }
-
-public static class Helper
-{
-    public static readonly Random Rnd = new Random();
-    private static Coin GetCoin(int value) => value == 1 ? Coin.Gold : Coin.Silver;
-    private static Coin RandomCoin() => GetCoin(Rnd.Next(0, 2)); private static List<Coin> MakeBox() => [RandomCoin(), RandomCoin()];
-    private static bool TwoSilver(this List<Coin> box) => box[0] == box[1] && box[0] == Coin.Silver;
-
-    public static List<Coin> Choose()
-    {
-        List<Coin> result;
-        while ((result = MakeBox()).TwoSilver()) { };
-        return result;
-    }
-}
